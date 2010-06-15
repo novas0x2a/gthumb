@@ -1073,6 +1073,81 @@ flickr_service_list_photos_finish (FlickrService  *self,
 		return _g_object_list_ref (g_simple_async_result_get_op_res_gpointer (G_SIMPLE_ASYNC_RESULT (result)));
 }
 
+static void
+set_photo_date_ready_cb (SoupSession *session,
+			 SoupMessage *msg,
+			 gpointer     user_data)
+{
+	FlickrService      *self = user_data;
+	GSimpleAsyncResult *result;
+
+	result = flickr_connection_get_result (self->priv->conn);
+
+	if (msg->status_code != 200) {
+		g_simple_async_result_set_error (result,
+						 SOUP_HTTP_ERROR,
+						 msg->status_code,
+						 "%s",
+						 soup_status_get_phrase (msg->status_code));
+		g_simple_async_result_complete_in_idle (result);
+		return;
+	}
+
+	g_simple_async_result_complete_in_idle (result);
+}
+
+void
+flickr_service_set_photo_date (FlickrService       *self,
+			       const char          *photo_id,
+			       const char          *date_posted,
+			       const char          *date_taken,
+			       const char          *date_taken_granularity,
+			       GCancellable        *cancellable,
+			       GAsyncReadyCallback callback,
+			       gpointer            user_data)
+{
+	GHashTable  *data_set;
+	SoupMessage *msg;
+
+	g_return_if_fail(photo_id != NULL);
+	g_return_if_fail(date_posted != NULL || date_taken != NULL);
+
+	gth_task_progress (GTH_TASK (self->priv->conn), _("Setting a photo's date"), NULL, TRUE, 0.0);
+
+	data_set = g_hash_table_new (g_str_hash, g_str_equal);
+	g_hash_table_insert (data_set, "method", "flickr.photos.setDates");
+	g_hash_table_insert (data_set, "photo_id", (char *) photo_id);
+	if (date_posted != NULL)
+		g_hash_table_insert (data_set, "date_posted", (char *) date_posted);
+	if (date_taken != NULL)
+		g_hash_table_insert (data_set, "date_taken", (char *) date_taken);
+	if (date_taken_granularity != NULL)
+		g_hash_table_insert (data_set, "date_taken_granularity", (char *) date_taken_granularity);
+	flickr_connection_add_api_sig (self->priv->conn, data_set);
+	msg = soup_form_request_new_from_hash ("GET", self->priv->conn->server->rest_url, data_set);
+	flickr_connection_send_message (self->priv->conn,
+					msg,
+					cancellable,
+					callback,
+					user_data,
+					flickr_service_set_photo_date,
+					set_photo_date_ready_cb,
+					self);
+
+	g_hash_table_destroy (data_set);
+}
+
+gboolean
+flickr_service_set_photo_date_finish (FlickrService  *self,
+				      GAsyncResult   *result,
+				      GError        **error)
+{
+	if (g_simple_async_result_propagate_error (G_SIMPLE_ASYNC_RESULT (result), error))
+		return FALSE;
+	else
+		return TRUE;
+}
+
 
 /* utilities */
 

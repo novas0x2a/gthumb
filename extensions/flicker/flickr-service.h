@@ -121,6 +121,17 @@ void              flickr_service_list_photos              (FlickrService        
 GList *           flickr_service_list_photos_finish       (FlickrService        *self,
 						           GAsyncResult         *result,
 						           GError              **error);
+void              flickr_service_set_photo_date            (FlickrService       *self,
+							    const char          *photo_id,
+							    const char          *date_posted,
+							    const char          *date_taken,
+							    const char          *date_taken_granularity,
+							    GCancellable        *cancellable,
+							    GAsyncReadyCallback callback,
+							    gpointer            user_data);
+gboolean          flickr_service_set_photo_date_finish    (FlickrService       *self,
+							   GAsyncResult        *result,
+							   GError             **error);
 
 /* utilities */
 
