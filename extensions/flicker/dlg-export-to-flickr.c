@@ -501,7 +501,8 @@ dlg_export_to_flickr (FlickrServer *server,
 		if (g_content_type_equals (mime_type, "image/bmp")
 		    || g_content_type_equals (mime_type, "image/gif")
 		    || g_content_type_equals (mime_type, "image/jpeg")
-		    || g_content_type_equals (mime_type, "image/png"))
+		    || g_content_type_equals (mime_type, "image/png")
+		    || _g_mime_type_is_video (mime_type))
 		{
 			total_size += g_file_info_get_size (file_data->info);
 			n_total++;
