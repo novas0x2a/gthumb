@@ -280,6 +280,7 @@ static const char *try_digitalization_tag[] = {
 	"Xmp::photoshop::DateCreated",
 	"Xmp::xmp::ModifyDate",
 	"Xmp::xmp::MetadataDate",
+	"general::datetime",
 	NULL
 };
 
